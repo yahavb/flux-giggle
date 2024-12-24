@@ -1,11 +1,11 @@
 import torch
 import torch.nn as nn
-
-from transformers.modeling_outputs import BaseModelOutput
+from transformers.modeling_outputs \
+    import BaseModelOutputWithPooling
 from typing import Optional, Union, Tuple
 
 
-class TracingT5TextEncoderWrapper(nn.Module):
+class TracingCLIPTextEncoderWrapper(nn.Module):
     def __init__(self, text_encoder):
         super().__init__()
         self.neuron_text_encoder = text_encoder
@@ -15,25 +15,19 @@ class TracingT5TextEncoderWrapper(nn.Module):
 
     def forward(
         self,
-        input_ids: Optional[torch.LongTensor] = None,
-        attention_mask: Optional[torch.FloatTensor] = None,
-        head_mask: Optional[torch.FloatTensor] = None,
-        inputs_embeds: Optional[torch.FloatTensor] = None,
+        input_ids: Optional[torch.Tensor] = None,
+        attention_mask: Optional[torch.Tensor] = None,
+        position_ids: Optional[torch.Tensor] = None,
         output_attentions: Optional[bool] = None,
         output_hidden_states: Optional[bool] = False,
-        return_dict: Optional[bool] = False,
-    ) -> Union[Tuple[torch.FloatTensor], BaseModelOutput]:
-        return_dict = return_dict if return_dict is not None \
-            else self.config.use_return_dict
+        return_dict: Optional[bool] = True
+    ) -> Union[Tuple, BaseModelOutputWithPooling]:
 
-        encoder_outputs = self.neuron_text_encoder(
+        return self.neuron_text_encoder(
             input_ids=input_ids,
             attention_mask=attention_mask,
-            inputs_embeds=inputs_embeds,
-            head_mask=head_mask,
+            position_ids=position_ids,
             output_attentions=output_attentions,
             output_hidden_states=output_hidden_states,
-            return_dict=False,
+            return_dict=True,
         )
-        print("[DEBUG] TracingT5TextEncoderWrapper, encoder_outputs.shape =", encoder_outputs.shape)
-        return encoder_outputs
