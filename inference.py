@@ -103,7 +103,7 @@ class NeuronFluxTransformer2DModel(nn.Module):
         
         encoder_hidden_states = encoder_hidden_states.to(torch.bfloat16)
         for block in self.transformer_blocks_model:
-             hidden_states,*_ = block(
+             encoder_hidden_state,hidden_states = block(
                      hidden_states.to(torch.bfloat16),
                      encoder_hidden_states,
                      temb.to(torch.bfloat16),
